@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Meal Planner - Lactose & Gluten Free</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🥗 Smart Meal Planner</h1>
+            <p class="subtitle">Lactose & Gluten Free for Teens</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="daily">Daily Planner</button>
+            <button class="tab-btn" data-tab="weekly">Weekly Calendar</button>
+            <button class="tab-btn" data-tab="shopping">Shopping List</button>
+            <button class="tab-btn" data-tab="nutrition">Nutrition</button>
+            <button class="tab-btn" data-tab="rotation">Rotation</button>
+        </nav>
+
+        <!-- Daily Meal Planner View -->
+        <section id="daily-view" class="view-container active">
+            <div class="daily-header">
+                <button class="nav-btn" id="prev-day">‹</button>
+                <h2 id="current-day">Monday</h2>
+                <button class="nav-btn" id="next-day">›</button>
+            </div>
+            
+            <div class="meals-container" id="meals-container">
+                <!-- Meals will be populated by JavaScript -->
+            </div>
+
+            <div class="daily-nutrition-summary">
+                <h3>Daily Nutritional Summary</h3>
+                <div class="nutrition-bars">
+                    <div class="nutrition-bar">
+                        <span>Calories</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" data-nutrient="calories"></div>
+                        </div>
+                        <span class="bar-value" id="calories-value">0/2300</span>
+                    </div>
+                    <div class="nutrition-bar">
+                        <span>Protein (g)</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" data-nutrient="protein"></div>
+                        </div>
+                        <span class="bar-value" id="protein-value">0/50</span>
+                    </div>
+                    <div class="nutrition-bar">
+                        <span>Calcium (mg)</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" data-nutrient="calcium"></div>
+                        </div>
+                        <span class="bar-value" id="calcium-value">0/1300</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weekly Calendar View -->
+        <section id="weekly-view" class="view-container">
+            <div class="weekly-header">
+                <h2>Weekly Meal Calendar</h2>
+                <div class="week-selector">
+                    <button class="btn btn--secondary active" data-week="1">Week 1</button>
+                    <button class="btn btn--secondary" data-week="2">Week 2</button>
+                </div>
+            </div>
+            
+            <div class="weekly-calendar" id="weekly-calendar">
+                <!-- Calendar will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Shopping List View -->
+        <section id="shopping-view" class="view-container">
+            <div class="shopping-header">
+                <h2>Shopping List</h2>
+                <div class="store-selector">
+                    <button class="btn btn--secondary active" data-store="paknsave">PAK'nSAVE</button>
+                    <button class="btn btn--secondary" data-store="newworld">New World</button>
+                </div>
+            </div>
+            
+            <div class="shopping-content" id="shopping-content">
+                <!-- Shopping list will be populated by JavaScript -->
+            </div>
+
+            <div class="shopping-total">
+                <h3>Total Estimated Cost: <span id="total-cost">$0.00</span></h3>
+            </div>
+        </section>
+
+        <!-- Nutrition Dashboard View -->
+        <section id="nutrition-view" class="view-container">
+            <h2>Nutritional Dashboard</h2>
+            
+            <div class="chart-container" style="position: relative; height: 300px;">
+                <img src="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/765b19ee4befc98b3df6b38b1e525fde/ed77e99a-f724-473e-8672-e4cc12a85527/6abf2707.png" alt="Daily meal timing and food group serving distribution" class="chart-image">
+            </div>
+
+            <div class="nutrition-goals">
+                <h3>Daily Nutritional Targets</h3>
+                <div class="goals-grid">
+                    <div class="goal-card">
+                        <h4>Calories</h4>
+                        <div class="goal-progress">
+                            <div class="goal-bar">
+                                <div class="goal-fill" data-target="2300" data-current="0"></div>
+                            </div>
+                            <span>0 / 2300 kcal</span>
+                        </div>
+                    </div>
+                    <div class="goal-card">
+                        <h4>Protein</h4>
+                        <div class="goal-progress">
+                            <div class="goal-bar">
+                                <div class="goal-fill" data-target="50" data-current="0"></div>
+                            </div>
+                            <span>0 / 50g</span>
+                        </div>
+                    </div>
+                    <div class="goal-card">
+                        <h4>Calcium</h4>
+                        <div class="goal-progress">
+                            <div class="goal-bar">
+                                <div class="goal-fill" data-target="1300" data-current="0"></div>
+                            </div>
+                            <span>0 / 1300mg</span>
+                        </div>
+                    </div>
+                    <div class="goal-card">
+                        <h4>Iron</h4>
+                        <div class="goal-progress">
+                            <div class="goal-bar">
+                                <div class="goal-fill" data-target="15" data-current="0"></div>
+                            </div>
+                            <span>0 / 15mg</span>
+                        </div>
+                    </div>
+                    <div class="goal-card">
+                        <h4>Fiber</h4>
+                        <div class="goal-progress">
+                            <div class="goal-bar">
+                                <div class="goal-fill" data-target="25" data-current="0"></div>
+                            </div>
+                            <span>0 / 25g</span>
+                        </div>
+                    </div>
+                    <div class="goal-card">
+                        <h4>Fluid</h4>
+                        <div class="goal-progress">
+                            <div class="goal-bar">
+                                <div class="goal-fill" data-target="1800" data-current="0"></div>
+                            </div>
+                            <span>0 / 1800ml</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nutrition-tips">
+                <h3>💡 Nutrition Tips</h3>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <h4>🥛 Lactose-Free Calcium</h4>
+                        <p>Get calcium from fortified plant milks, leafy greens, tahini, and canned fish with bones.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>🌾 Gluten-Free Grains</h4>
+                        <p>Choose quinoa, rice, oats (certified GF), and buckwheat for variety and nutrients.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>💪 Protein Power</h4>
+                        <p>Include protein at every meal and snack to support growth and muscle development.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rotation System View -->
+        <section id="rotation-view" class="view-container">
+            <h2>6-Week Rotation System</h2>
+            
+            <div class="rotation-calendar">
+                <div class="rotation-week">
+                    <h3>Week 1-2: Foundation Phase</h3>
+                    <div class="rotation-focus">
+                        <div class="focus-item">
+                            <h4>🐟 Proteins</h4>
+                            <p>Salmon, Chicken, Tuna, Eggs</p>
+                        </div>
+                        <div class="focus-item">
+                            <h4>🌾 Grains</h4>
+                            <p>Quinoa, GF Oats, Brown Rice</p>
+                        </div>
+                        <div class="focus-item">
+                            <h4>🥬 Vegetables</h4>
+                            <p>Leafy greens, Root vegetables, Cruciferous</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rotation-week">
+                    <h3>Week 3-4: Variety Phase</h3>
+                    <div class="rotation-focus">
+                        <div class="focus-item">
+                            <h4>🥩 Proteins</h4>
+                            <p>Lamb, Beef, Legumes, Nuts</p>
+                        </div>
+                        <div class="focus-item">
+                            <h4>🌾 Grains</h4>
+                            <p>Millet, Buckwheat, GF Pasta</p>
+                        </div>
+                        <div class="focus-item">
+                            <h4>🥕 Vegetables</h4>
+                            <p>Colorful vegetables, Seasonal produce</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rotation-week">
+                    <h3>Week 5-6: Innovation Phase</h3>
+                    <div class="rotation-focus">
+                        <div class="focus-item">
+                            <h4>🐟 Proteins</h4>
+                            <p>Fish varieties, Turkey, Plant proteins</p>
+                        </div>
+                        <div class="focus-item">
+                            <h4>🌾 Grains</h4>
+                            <p>Amaranth, Teff, Rice varieties</p>
+                        </div>
+                        <div class="focus-item">
+                            <h4>🍅 Vegetables</h4>
+                            <p>Mediterranean style, Asian greens</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seasonal-recommendations">
+                <h3>🌿 Current Season: Winter (August)</h3>
+                <div class="seasonal-grid">
+                    <div class="seasonal-card">
+                        <h4>Winter Vegetables</h4>
+                        <p>Kumara, Pumpkin, Cauliflower, Brussels sprouts, Cabbage</p>
+                    </div>
+                    <div class="seasonal-card">
+                        <h4>Winter Fruits</h4>
+                        <p>Oranges, Mandarins, Apples, Pears, Kiwifruit</p>
+                    </div>
+                    <div class="seasonal-card">
+                        <h4>Comfort Foods</h4>
+                        <p>Warming soups, Roasted vegetables, Hot beverages</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Meal Detail Modal -->
+        <div id="meal-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <h3 id="modal-meal-name">Meal Name</h3>
+                <div id="modal-meal-details">
+                    <!-- Meal details will be populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
