@@ -167,7 +167,8 @@ let currentState = {
   activeTab: 'daily',
   currentDay: 'Monday',
   currentWeek: 1,
-  selectedStore: 'paknsave'
+  selectedStore: 'paknsave',
+  shoppingMode: 'store' // NEW: 'store' or 'aggregated'
 };
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -178,10 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-  // Clear any existing event listeners and setup new ones
   setupEventListeners();
-  
-  // Initial render
   renderDailyView();
   renderWeeklyView();
   renderShoppingList();
@@ -189,11 +187,9 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
-  // Tab Navigation
   document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.replaceWith(btn.cloneNode(true)); // Remove existing listeners
+    btn.replaceWith(btn.cloneNode(true));
   });
-  
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -203,10 +199,8 @@ function setupEventListeners() {
     });
   });
 
-  // Day Navigation
   const prevBtn = document.getElementById('prev-day');
   const nextBtn = document.getElementById('next-day');
-  
   if (prevBtn) {
     prevBtn.replaceWith(prevBtn.cloneNode(true));
     document.getElementById('prev-day').addEventListener('click', function(e) {
@@ -215,7 +209,6 @@ function setupEventListeners() {
       navigateDay(-1);
     });
   }
-  
   if (nextBtn) {
     nextBtn.replaceWith(nextBtn.cloneNode(true));
     document.getElementById('next-day').addEventListener('click', function(e) {
@@ -225,11 +218,9 @@ function setupEventListeners() {
     });
   }
 
-  // Week Navigation
   document.querySelectorAll('[data-week]').forEach(btn => {
     btn.replaceWith(btn.cloneNode(true));
   });
-  
   document.querySelectorAll('[data-week]').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -239,11 +230,9 @@ function setupEventListeners() {
     });
   });
 
-  // Store Navigation
   document.querySelectorAll('[data-store]').forEach(btn => {
     btn.replaceWith(btn.cloneNode(true));
   });
-  
   document.querySelectorAll('[data-store]').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -253,10 +242,17 @@ function setupEventListeners() {
     });
   });
 
-  // Modal handlers
+  const shoppingToggle = document.getElementById('shopping-toggle');
+  if (shoppingToggle) {
+    shoppingToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleShoppingMode();
+    });
+  }
+
   const modal = document.getElementById('meal-modal');
   const closeBtn = document.querySelector('.modal-close');
-  
   if (closeBtn) {
     closeBtn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -264,7 +260,6 @@ function setupEventListeners() {
       hideModal();
     });
   }
-  
   if (modal) {
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
@@ -275,21 +270,15 @@ function setupEventListeners() {
 }
 
 function switchTab(tabName) {
-  // Update active tab button
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-  
-  // Update active view
   document.querySelectorAll('.view-container').forEach(view => {
     view.classList.remove('active');
   });
   document.getElementById(`${tabName}-view`).classList.add('active');
-  
   currentState.activeTab = tabName;
-  
-  // Refresh content for specific tabs
   if (tabName === 'nutrition') {
     renderNutritionDashboard();
   } else if (tabName === 'weekly') {
@@ -304,17 +293,13 @@ function switchTab(tabName) {
 function navigateDay(direction) {
   const currentIndex = daysOfWeek.indexOf(currentState.currentDay);
   let newIndex;
-  
-  if (direction === 1) { // Next
+  if (direction === 1) {
     newIndex = currentIndex < daysOfWeek.length - 1 ? currentIndex + 1 : 0;
-  } else { // Previous
+  } else {
     newIndex = currentIndex > 0 ? currentIndex - 1 : daysOfWeek.length - 1;
   }
-  
   currentState.currentDay = daysOfWeek[newIndex];
   renderDailyView();
-  
-  // Update nutrition dashboard if it's active
   if (currentState.activeTab === 'nutrition') {
     renderNutritionDashboard();
   }
@@ -326,13 +311,9 @@ function switchWeek(week) {
   currentState.currentWeek = week;
   renderWeeklyView();
   renderShoppingList();
-  
-  // Update daily view if it's active
   if (currentState.activeTab === 'daily') {
     renderDailyView();
   }
-  
-  // Update nutrition if it's active
   if (currentState.activeTab === 'nutrition') {
     renderNutritionDashboard();
   }
@@ -345,46 +326,41 @@ function switchStore(store) {
   renderShoppingList();
 }
 
+function toggleShoppingMode() {
+  currentState.shoppingMode = currentState.shoppingMode === 'store' ? 'aggregated' : 'store';
+  renderShoppingList();
+}
+
 function renderDailyView() {
   const currentDayElement = document.getElementById('current-day');
   if (currentDayElement) {
     currentDayElement.textContent = currentState.currentDay;
   }
-  
   const weekData = currentState.currentWeek === 1 ? mealData.week1_meals : mealData.week2_meals;
   const dayMeals = weekData[currentState.currentDay];
-  
   const mealsContainer = document.getElementById('meals-container');
   if (!mealsContainer || !dayMeals) return;
-  
   mealsContainer.innerHTML = '';
-  
   let totalCalories = 0;
   let totalProtein = 0;
   let totalCalcium = 0;
-  
   mealTimes.forEach(mealTime => {
     const meal = dayMeals[mealTime.key];
     if (meal) {
       totalCalories += meal.calories;
       totalProtein += meal.protein;
       totalCalcium += meal.calcium;
-      
       const mealCard = createMealCard(mealTime, meal);
       mealsContainer.appendChild(mealCard);
     }
   });
-  
   updateNutritionBars(totalCalories, totalProtein, totalCalcium);
 }
 
 function createMealCard(mealTime, mealData) {
   const card = document.createElement('div');
   card.className = 'meal-card';
-  
-  const mealType = mealTime.meal.toLowerCase().includes('snack') ? 'snack' : 
-                   mealTime.meal.toLowerCase().replace(' ', '_');
-  
+  const mealType = mealTime.meal.toLowerCase().includes('snack') ? 'snack' : mealTime.meal.toLowerCase().replace(' ', '_');
   card.innerHTML = `
     <div class="meal-header">
       <div class="meal-time">${mealTime.time}</div>
@@ -407,13 +383,11 @@ function createMealCard(mealTime, mealData) {
       </div>
     </div>
   `;
-  
   card.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     showMealModal(mealData);
   });
-  
   return card;
 }
 
@@ -421,19 +395,15 @@ function updateNutritionBars(calories, protein, calcium) {
   const caloriesPercent = Math.min((calories / nutritionalTargets.daily_calories) * 100, 100);
   const proteinPercent = Math.min((protein / nutritionalTargets.daily_protein) * 100, 100);
   const calciumPercent = Math.min((calcium / nutritionalTargets.daily_calcium) * 100, 100);
-  
   const caloriesBar = document.querySelector('[data-nutrient="calories"]');
   const proteinBar = document.querySelector('[data-nutrient="protein"]');
   const calciumBar = document.querySelector('[data-nutrient="calcium"]');
-  
   if (caloriesBar) caloriesBar.style.width = `${caloriesPercent}%`;
   if (proteinBar) proteinBar.style.width = `${proteinPercent}%`;
   if (calciumBar) calciumBar.style.width = `${calciumPercent}%`;
-  
   const caloriesValue = document.getElementById('calories-value');
   const proteinValue = document.getElementById('protein-value');
   const calciumValue = document.getElementById('calcium-value');
-  
   if (caloriesValue) caloriesValue.textContent = `${calories}/${nutritionalTargets.daily_calories}`;
   if (proteinValue) proteinValue.textContent = `${protein}/${nutritionalTargets.daily_protein}`;
   if (calciumValue) calciumValue.textContent = `${calcium}/${nutritionalTargets.daily_calcium}`;
@@ -442,37 +412,27 @@ function updateNutritionBars(calories, protein, calcium) {
 function renderWeeklyView() {
   const weekData = currentState.currentWeek === 1 ? mealData.week1_meals : mealData.week2_meals;
   const calendar = document.getElementById('weekly-calendar');
-  
   if (!calendar) return;
-  
   calendar.innerHTML = '';
-  
   daysOfWeek.forEach(day => {
     const dayColumn = document.createElement('div');
     dayColumn.className = 'day-column';
-    
     const dayMeals = weekData[day];
     if (dayMeals) {
       let dayMealsHtml = '';
-      
       mealTimes.forEach(mealTime => {
         const meal = dayMeals[mealTime.key];
         if (meal) {
-          const mealType = mealTime.meal.toLowerCase().includes('snack') ? 'snack' : 
-                           mealTime.meal.toLowerCase().replace(' ', '_');
-          
+          const mealType = mealTime.meal.toLowerCase().includes('snack') ? 'snack' : mealTime.meal.toLowerCase().replace(' ', '_');
           dayMealsHtml += `<div class="mini-meal ${mealType}" data-meal='${JSON.stringify(meal)}'>${meal.name}</div>`;
         }
       });
-      
       dayColumn.innerHTML = `
         <div class="day-header">${day}</div>
         <div class="day-meals">
           ${dayMealsHtml}
         </div>
       `;
-      
-      // Add click handlers to mini meals
       dayColumn.querySelectorAll('.mini-meal').forEach(miniMeal => {
         miniMeal.addEventListener('click', function(e) {
           e.preventDefault();
@@ -482,60 +442,84 @@ function renderWeeklyView() {
         });
       });
     }
-    
     calendar.appendChild(dayColumn);
   });
 }
 
 function renderShoppingList() {
-  const storeKey = `week${currentState.currentWeek}_${currentState.selectedStore}`;
-  const storeData = shoppingData[storeKey];
-  
   const shoppingContent = document.getElementById('shopping-content');
   if (!shoppingContent) return;
-  
   shoppingContent.innerHTML = '';
-  
-  let totalCost = 0;
-  
-  if (storeData) {
-    storeData.forEach(category => {
-      totalCost += category.cost;
-      
-      const categoryDiv = document.createElement('div');
-      categoryDiv.className = 'shopping-category';
-      categoryDiv.innerHTML = `
-        <h3>${category.category}</h3>
-        <div class="shopping-items">
-          <div class="shopping-item">
-            <input type="checkbox" class="item-checkbox">
-            <div class="item-details">
-              <div class="item-name">${category.category}</div>
-              <div class="item-description">${category.items}</div>
+
+  // Toggle Button for Shopping Modes
+  let toggleHtml = `<button id="shopping-toggle" style="margin-bottom:12px;">Switch to ${currentState.shoppingMode === 'store' ? 'Meal Ingredients' : 'Store Shopping List'}</button>`;
+  shoppingContent.innerHTML += toggleHtml;
+
+  if (currentState.shoppingMode === 'store') {
+    // Store-based shopping list
+    const storeKey = `week${currentState.currentWeek}_${currentState.selectedStore}`;
+    const storeData = shoppingData[storeKey];
+    let totalCost = 0;
+    if (storeData) {
+      storeData.forEach(category => {
+        totalCost += category.cost;
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'shopping-category';
+        categoryDiv.innerHTML = `
+          <h3>${category.category}</h3>
+          <div class="shopping-items">
+            <div class="shopping-item">
+              <input type="checkbox" class="item-checkbox">
+              <div class="item-details">
+                <div class="item-name">${category.category}</div>
+                <div class="item-description">${category.items}</div>
+              </div>
+              <div class="item-cost">$${category.cost.toFixed(2)}</div>
             </div>
-            <div class="item-cost">$${category.cost.toFixed(2)}</div>
           </div>
-        </div>
-      `;
-      
-      shoppingContent.appendChild(categoryDiv);
+        `;
+        shoppingContent.appendChild(categoryDiv);
+      });
+    }
+    const totalCostElement = document.createElement('div');
+    totalCostElement.id = 'total-cost';
+    totalCostElement.textContent = `Total Store Cost: $${totalCost.toFixed(2)}`;
+    shoppingContent.appendChild(totalCostElement);
+  } else {
+    // Aggregated meal-ingredient shopping list
+    const weekData = currentState.currentWeek === 1 ? mealData.week1_meals : mealData.week2_meals;
+    const aggregatedList = generateAggregatedShoppingList(weekData);
+    shoppingContent.innerHTML += `<h3>Full Ingredient Shopping List (All Meals)</h3>`;
+    Object.keys(aggregatedList).forEach(ingredient => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'ingredient-shopping-item';
+      itemDiv.innerHTML = `<input type="checkbox"> <span>${ingredient}</span> <span style="color:#888;">x${aggregatedList[ingredient]}</span>`;
+      shoppingContent.appendChild(itemDiv);
     });
   }
-  
-  const totalCostElement = document.getElementById('total-cost');
-  if (totalCostElement) {
-    totalCostElement.textContent = `$${totalCost.toFixed(2)}`;
-  }
+}
+
+function generateAggregatedShoppingList(weekMeals) {
+  // Aggregates and counts all unique ingredient strings
+  const shoppingItems = {};
+  Object.values(weekMeals).forEach(day => {
+    Object.values(day).forEach(meal => {
+      meal.ingredients.split(',').forEach(item => {
+        let cleanItem = item.trim();
+        if (!cleanItem) return;
+        shoppingItems[cleanItem] = (shoppingItems[cleanItem] || 0) + 1;
+      });
+    });
+  });
+  return shoppingItems;
 }
 
 function renderNutritionDashboard() {
   const weekData = currentState.currentWeek === 1 ? mealData.week1_meals : mealData.week2_meals;
   const dayMeals = weekData[currentState.currentDay];
-  
   let totalCalories = 0;
   let totalProtein = 0;
   let totalCalcium = 0;
-  
   if (dayMeals) {
     mealTimes.forEach(mealTime => {
       const meal = dayMeals[mealTime.key];
@@ -546,7 +530,6 @@ function renderNutritionDashboard() {
       }
     });
   }
-  
   updateGoalBars('calories', totalCalories, nutritionalTargets.daily_calories, 'kcal');
   updateGoalBars('protein', totalProtein, nutritionalTargets.daily_protein, 'g');
   updateGoalBars('calcium', totalCalcium, nutritionalTargets.daily_calcium, 'mg');
@@ -558,13 +541,11 @@ function renderNutritionDashboard() {
 function updateGoalBars(nutrient, current, target, unit) {
   const percentage = Math.min((current / target) * 100, 100);
   const goalCards = document.querySelectorAll('.goal-card');
-  
   goalCards.forEach(card => {
     const title = card.querySelector('h4');
     if (title && title.textContent.toLowerCase().includes(nutrient)) {
       const fillBar = card.querySelector('.goal-fill');
       const text = card.querySelector('span');
-      
       if (fillBar) fillBar.style.width = `${percentage}%`;
       if (text) text.textContent = `${current} / ${target}${unit}`;
     }
@@ -575,16 +556,13 @@ function showMealModal(mealData) {
   const modal = document.getElementById('meal-modal');
   const modalName = document.getElementById('modal-meal-name');
   const modalDetails = document.getElementById('modal-meal-details');
-  
   if (!modal || !modalName || !modalDetails) return;
-  
   modalName.textContent = mealData.name;
   modalDetails.innerHTML = `
     <div style="margin-bottom: 16px;">
       <h4 style="margin-bottom: 8px; color: var(--color-primary);">🥘 Ingredients</h4>
       <p style="margin: 0; line-height: 1.5;">${mealData.ingredients}</p>
     </div>
-    
     <div style="margin-bottom: 16px;">
       <h4 style="margin-bottom: 8px; color: var(--color-primary);">📊 Nutritional Information</h4>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
@@ -602,7 +580,6 @@ function showMealModal(mealData) {
         </div>
       </div>
     </div>
-    
     <div>
       <h4 style="margin-bottom: 8px; color: var(--color-primary);">✅ Dietary Notes</h4>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -612,7 +589,6 @@ function showMealModal(mealData) {
       </div>
     </div>
   `;
-  
   modal.classList.remove('hidden');
 }
 
@@ -623,5 +599,4 @@ function hideModal() {
   }
 }
 
-// Global function for backward compatibility
 window.showMealModal = showMealModal;
